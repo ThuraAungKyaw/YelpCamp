@@ -47,7 +47,7 @@ app.post('/campgrounds', async (req, res) => {
 })
 
 // Render create campground form
-app.get('/campgrounds/new', (req, res) => {
+app.get('/campground/new', (req, res) => {
   res.render('campgrounds/new')
 })
 
