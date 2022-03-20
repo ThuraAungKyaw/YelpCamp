@@ -1,6 +1,9 @@
 const { mongo_url } = require('../config.js');
 const mongoose = require("mongoose");
+const { descriptors, places } = require('./seedHelpers.js')
+const cities = require("./cities.js")
 const Campground = require("../models/campground");
+
 
 
 async function connect() {
@@ -14,12 +17,22 @@ async function connect() {
 
 }
 
+const sample = (arr) => arr[Math.floor(Math.random() * arr.length)]
+
 connect()
 const seedDB = async () => {
   await Campground.deleteMany({});
-  const c = new Campground({title: 'Purple Field'})
-  await c.save()
+  for(let i=0;i < 50;i++){
+    const c = new Campground({
+      title: `${sample(descriptors)} ${sample(places)}`,
+      location: `${cities[i].city}, ${cities[i].state}`
+    })
+    await c.save()
+  }
+
   console.log('DONE')
 }
 
-seedDB()
+seedDB().then(() => {
+  mongoose.connection.close();
+})
