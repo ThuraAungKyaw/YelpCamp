@@ -1,7 +1,4 @@
-<%- include('../partials/head')%>
-<title>Campgrounds</title>
-</head>
-<body>
+<%- layout('layouts/boilerplate')%>
     <h1>All Campgrounds</h1>
     <a href="/campgrounds/new">Add Campground</a>
 <ul>
@@ -9,6 +6,3 @@
     <li><a href="/campground/<%= camp.id %>"><%= camp.title %></a> </li>
   <% } %>
 </ul>
-
-</body>
-  <%- include('../partials/footer')%>

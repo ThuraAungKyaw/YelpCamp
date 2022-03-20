@@ -1,6 +1,4 @@
-<title><%= campground.title %></title>
-</head>
-<body>
+<%- layout('layouts/boilerplate')%>
   <h1><%= campground.title %></h1>
   <h2><%= campground.location %></h2>
     <a href="/campground/<%= campground.id %>/edit">Edit</a>
@@ -11,5 +9,3 @@
     <br>
 
   <a href="/campgrounds">All Campgrounds</a>
-
-</body>

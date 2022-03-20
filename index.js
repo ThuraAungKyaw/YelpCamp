@@ -1,13 +1,15 @@
 const express = require("express");
 const path = require("path");
-const {mongo_url, port } = require("./config.js");
+const { mongo_url, port } = require("./config.js");
 const mongoose = require("mongoose");
+const ejsMate = require("ejs-mate");
 const methodOverride = require("method-override");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const Campground = require("./models/campground");
 
+app.engine('ejs', ejsMate)
 app.set('view engine', 'ejs')
 app.set("views", path.join(__dirname, 'views'))
 
