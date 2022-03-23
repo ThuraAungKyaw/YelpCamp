@@ -2,30 +2,46 @@
 <div class="row">
   <div class="col-6 offset-3">
     <h1>New Campground</h1>
-    <form class="" action="/campgrounds" method="post">
+    <form class="validated-form" action="/campgrounds" method="post" novalidate >
       <div class="mb-3">
         <label class="form-label" for="title">Title</label>
-        <input class="form-control" id="title" type="text" name="campground[title]" value="">
+        <input class="form-control" id="title" type="text" name="campground[title]" value="" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
       </div>
       <div class="mb-3">
         <label class="form-label" for="location">Location</label>
-        <input class="form-control" id="location" type="text" name="campground[location]" value="">
+        <input class="form-control" id="location" type="text" name="campground[location]" value="" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
       </div>
       <div class="mb-3">
         <label class="form-label" for="image">Image Url</label>
-        <input class="form-control" id="image" type="text" name="campground[image]" value="">
+        <input class="form-control" id="image" type="text" name="campground[image]" value="" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
       </div>
 
       <div class="mb-3">
         <label class="form-label" for="price">Price</label>
         <div class="input-group">
   <span class="input-group-text" id="price">$</span>
-  <input type="text" id="price" name="campground[price]"  class="form-control" placeholder="0.0" aria-label="price" aria-describedby="price">
+  <input type="text" id="price" name="campground[price]"
+   class="form-control" placeholder="0.0" aria-label="price" aria-describedby="price" required>
+   <div class="valid-feedback">
+     Looks good!
+   </div>
 </div>
       </div>
       <div class="mb-3">
         <label class="form-label" for="description">Description</label>
-        <textarea id="description" class="form-control" name="campground[description]" rows="8" cols="80"></textarea>
+        <textarea id="description" class="form-control" name="campground[description]" rows="8" cols="80" required></textarea>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
       </div>
 
 

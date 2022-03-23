@@ -4,6 +4,9 @@ const { mongo_url, port } = require("./config.js");
 const mongoose = require("mongoose");
 const ejsMate = require("ejs-mate");
 const methodOverride = require("method-override");
+const wrapAsync = require("./utils/catchAsync");
+const CGValidator = require("./validators/campground");
+const ExpressError = require('./utils/ExpressError');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -26,25 +29,41 @@ async function connect() {
   }
 }
 
+const validateCampground = (req, res, next) => {
+  const { error } = CGValidator.validate(req.body);
+
+  if(error){
+    // ***
+     console.log(error)
+    const msg = error.details.map(el => el.message).join(',')
+    throw new ExpressError(msg, 400)
+  } else{
+    // It is crucial to call next if the validation passed cause it will just hangs
+    // If we don't
+    next();
+  }
+
+}
+
 // Test Route
 app.get('/', (req, res) => {
   res.render('home')
 })
 
 // Show all campgrounds
-app.get('/campgrounds', async (req, res) => {
+app.get('/campgrounds', wrapAsync(async (req, res) => {
   const campgrounds = await Campground.find({})
   res.render('campgrounds/index', { campgrounds: campgrounds })
-})
+}))
 
 // Create a new campground
-app.post('/campgrounds', async (req, res) => {
+app.post('/campgrounds', validateCampground, wrapAsync(async (req, res) => {
   const { campground } = req.body;
 
   const newCamp = new Campground(campground)
   await newCamp.save()
   res.redirect('/campgrounds')
-})
+}))
 
 // Render create campground form
 app.get('/campground/new', (req, res) => {
@@ -52,50 +71,53 @@ app.get('/campground/new', (req, res) => {
 })
 
 // Show campground detail
-app.get('/campground/:id', async (req, res) => {
+app.get('/campground/:id', wrapAsync(async (req, res) => {
   const { id } = req.params;
   const campground = await Campground.findById(id)
 
   res.render('campgrounds/show', { campground: campground })
-})
+}))
 
 //Edit Campground
-app.put('/campground/:id', async (req, res) => {
+app.put('/campground/:id', validateCampground, wrapAsync(async (req, res) => {
   const { id } = req.params;
 
-  try {
-    const res = await Campground.findByIdAndUpdate(id, {...req.body.campground}, {new: true})
-    console.log(res)
-  } catch(e) {
-    console.log(e)
-  }
-  finally {
-    res.redirect(`/campground/${id}`)
-  }
-})
+    const response = await Campground.findByIdAndUpdate(id, {...req.body.campground}, {new: true})
+    console.log(response)
 
-app.get('/campground/:id/edit', async (req, res) => {
+    res.redirect(`/campground/${id}`)
+
+}))
+
+app.get('/campground/:id/edit', wrapAsync(async (req, res) => {
   const { id } = req.params;
   const campground = await Campground.findById(id)
 
   res.render('campgrounds/edit', { camp: campground })
-})
+}))
 
-app.delete('/campground/:id', async (req, res) => {
+app.delete('/campground/:id', wrapAsync(async (req, res) => {
     const { id } = req.params;
-  try {
-    const res = await Campground.findByIdAndDelete(id)
-    console.log(res)
-  } catch(e) {
-    console.log(e)
-  }
-  finally {
+    const response = await Campground.findByIdAndDelete(id)
+    console.log(response)
     res.redirect(`/campgrounds`)
-  }
+
+}))
+
+//This will match if nothing above matches
+app.all('*', (req, res, next) => {
+  next(new ExpressError('Page not found!', 404))
+})
+//For sync callbacks this will be called instantly without any error but for
+// async callbacks we have to wrap them with a function that catches and passes
+//the error to the following function since they are not completed instantly
+app.use((err, req, res, next) => {
+  const { code = 500 } = err;
+  if(!err.message) err.message = "Something went wrong!"
+  res.status(code).render('error', {err: err})
 })
 
 app.listen(port, () => {
-
   console.log(`Server started at ${port}`)
   connect()
 })
