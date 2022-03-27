@@ -1,6 +1,6 @@
 const Joi = require("Joi");
 
-module.exports = Joi.object({
+module.exports.CGValidator = Joi.object({
     campground: Joi.object({
       title: Joi.string().required(),
       price: Joi.number().required().min(0),
@@ -9,3 +9,10 @@ module.exports = Joi.object({
       description: Joi.string().required()
     }).required()
   })
+
+  module.exports.ReviewValidator = Joi.object({
+      review: Joi.object({
+        rating: Joi.number().required().min(1).max(5),
+        body: Joi.string().required()
+      }).required()
+    })

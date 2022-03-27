@@ -5,12 +5,13 @@ const mongoose = require("mongoose");
 const ejsMate = require("ejs-mate");
 const methodOverride = require("method-override");
 const wrapAsync = require("./utils/catchAsync");
-const CGValidator = require("./validators/campground");
+const { CGValidator, ReviewValidator } = require("./validators/all");
 const ExpressError = require('./utils/ExpressError');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const Campground = require("./models/campground");
+const Review = require("./models/review")
 
 app.engine('ejs', ejsMate)
 app.set('view engine', 'ejs')
@@ -38,6 +39,20 @@ const validateCampground = (req, res, next) => {
     const msg = error.details.map(el => el.message).join(',')
     throw new ExpressError(msg, 400)
   } else{
+    // It is crucial to call next if the validation passed cause it will just hangs
+    // If we don't
+    next();
+  }
+
+}
+
+const validateReview = (req, res, next) => {
+  const { error } = ReviewValidator.validate(req.body);
+
+  if(error){
+    const msg = error.details.map(el => el.message).join(',')
+    throw new ExpressError(msg, 400)
+  } else {
     // It is crucial to call next if the validation passed cause it will just hangs
     // If we don't
     next();
@@ -73,7 +88,7 @@ app.get('/campground/new', (req, res) => {
 // Show campground detail
 app.get('/campground/:id', wrapAsync(async (req, res) => {
   const { id } = req.params;
-  const campground = await Campground.findById(id)
+  const campground = await Campground.findById(id).populate('reviews')
 
   res.render('campgrounds/show', { campground: campground })
 }))
@@ -102,6 +117,26 @@ app.delete('/campground/:id', wrapAsync(async (req, res) => {
     console.log(response)
     res.redirect(`/campgrounds`)
 
+}))
+
+// Reviews
+app.post("/campgrounds/:id/reviews", validateReview, wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const { review } = req.body;
+
+  const rv = new Review({ rating: review.rating, body: review.body })
+  const camp = await Campground.findById(id)
+  camp.reviews.push(rv)
+  await rv.save()
+  await camp.save()
+  res.redirect(`/campground/${id}`)
+}))
+
+app.delete('/campgrounds/:id/reviews/:review_id', wrapAsync(async (req, res) => {
+  const { id, review_id } = req.params;
+  await Review.findByIdAndDelete(review_id)
+  await Campground.findByIdAndUpdate(id, { $pull: { reviews: review_id }})
+  res.redirect(`/campground/${id}`)
 }))
 
 //This will match if nothing above matches
