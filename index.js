@@ -3,8 +3,9 @@ const path = require("path");
 const { mongo_url, port } = require("./config.js");
 const mongoose = require("mongoose");
 const ejsMate = require("ejs-mate");
+const session = require("express-session");
 const methodOverride = require("method-override");
-const wrapAsync = require("./utils/catchAsync");
+const flash = require("connect-flash");
 const ExpressError = require('./utils/ExpressError');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,8 +20,25 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+    maxAge: 1000 * 60 * 60 * 24 * 7
 
+  }
+}))
 
+app.use(flash())
+
+app.use((req, res, next) => {
+  res.locals.success = req.flash('success')
+  res.locals.error = req.flash('error')
+  next();
+})
 // Test Route
 app.get('/', (req, res) => {
   res.render('home')
