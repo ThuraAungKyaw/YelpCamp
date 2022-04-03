@@ -9,8 +9,14 @@ const flash = require("connect-flash");
 const ExpressError = require('./utils/ExpressError');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const passport = require("passport");
+const LocalStategy = require("passport-local");
+const User = require("./models/user");
+
+//Routers
 const campRouter = require('./routes/campgrounds');
 const reviewRouter = require('./routes/reviews');
+const userRouter = require('./routes/users');
 
 app.engine('ejs', ejsMate)
 app.set('view engine', 'ejs')
@@ -34,7 +40,16 @@ app.use(session({
 
 app.use(flash())
 
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// Middleware called on every request
 app.use((req, res, next) => {
+
+  res.locals.currentUser = req.user;
   res.locals.success = req.flash('success')
   res.locals.error = req.flash('error')
   next();
@@ -45,7 +60,9 @@ app.get('/', (req, res) => {
 })
 
 app.use('/campgrounds', campRouter);
-app.use('/campgrounds/:id/reviews', reviewRouter)
+app.use('/campgrounds/:id/reviews', reviewRouter);
+app.use('/users', userRouter);
+
 
 //This will match if nothing above matches
 app.all('*', (req, res, next) => {
