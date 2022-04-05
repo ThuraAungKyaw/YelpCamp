@@ -3,12 +3,19 @@ const router = express.Router({ params: true });
 const campground = require("../controllers/campground");
 const { isAuthor, ensureLoggedIn, validateCampground } = require("../middlewares");
 
-router.get('/', campground.index);
-router.post('/', ensureLoggedIn, validateCampground, campground.createNew);
+
+router.route('/')
+      .get(campground.index)
+      .post(ensureLoggedIn, validateCampground, campground.createNew)
+      
 router.get('/new', ensureLoggedIn, campground.renderNewForm)
-router.get('/:id', campground.show)
-router.put('/:id', ensureLoggedIn, isAuthor, validateCampground, campground.edit)
+
+router.route('/:id')
+      .get(campground.show)
+      .put(ensureLoggedIn, isAuthor, validateCampground, campground.edit)
+      .delete(ensureLoggedIn, isAuthor, campground.delete)
+
 router.get('/:id/edit', ensureLoggedIn, isAuthor, campground.renderEditForm)
-router.delete('/:id', ensureLoggedIn, isAuthor, campground.delete)
+
 
 module.exports = router;
