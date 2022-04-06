@@ -1,4 +1,13 @@
+if(process.env.NODE_ENV !== "production"){
+  require("dotenv").config();
+}
+
+const PORT = process.env.PORT || 3000;
+const LocalStategy = require("passport-local");
+const ExpressError = require('./utils/ExpressError');
+const User = require("./models/user");
 const express = require("express");
+const app = express();
 const path = require("path");
 const { mongo_url, port } = require("./config.js");
 const mongoose = require("mongoose");
@@ -6,12 +15,7 @@ const ejsMate = require("ejs-mate");
 const session = require("express-session");
 const methodOverride = require("method-override");
 const flash = require("connect-flash");
-const ExpressError = require('./utils/ExpressError');
-const app = express();
-const PORT = process.env.PORT || 3000;
 const passport = require("passport");
-const LocalStategy = require("passport-local");
-const User = require("./models/user");
 
 //Routers
 const campRouter = require('./routes/campgrounds');

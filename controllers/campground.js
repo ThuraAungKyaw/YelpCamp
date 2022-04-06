@@ -4,16 +4,20 @@ const wrapAsync = require("../utils/catchAsync");
 // Show all campgrounds
 module.exports.index = wrapAsync(async (req, res) => {
   const campgrounds = await Campground.find({})
+  console.log(campgrounds[0].images[0])
   res.render('campgrounds/index', { campgrounds: campgrounds })
 })
 
 // Create a new campground
 module.exports.createNew = wrapAsync(async (req, res) => {
   const { campground } = req.body;
+  const images = req.files.map(f => ({ url: f.path, filename: f.filename }))
 
   const newCamp = new Campground(campground)
+  newCamp.images = images;
   newCamp.author = req.user._id;
   await newCamp.save()
+  console.log(campground)
   req.flash("success", "Successfully created a new campground!")
   res.redirect('/campgrounds')
 })

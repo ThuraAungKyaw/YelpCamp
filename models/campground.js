@@ -2,13 +2,14 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Review = require('./review');
 
-const CampGroundSchema = new Schema({
+const CampgroundSchema = new Schema({
   title: {
     type: String
   },
-  image: {
-    type: String
-  },
+  images:[{
+    url: String,
+    filename: String
+  }],
   price: {
     type: Number
   },
@@ -27,7 +28,7 @@ const CampGroundSchema = new Schema({
   ]
 })
 //Middleware func to remove associated reviews
-CampGroundSchema.post('findOneAndDelete', async function(doc) {
+CampgroundSchema.post('findOneAndDelete', async function(doc) {
     if(doc && doc.reviews.length !== 0){
       await Review.remove({
         _id: {
@@ -37,4 +38,4 @@ CampGroundSchema.post('findOneAndDelete', async function(doc) {
     }
 })
 
-module.exports = mongoose.model('Campground', CampGroundSchema)
+module.exports = mongoose.model('Campground', CampgroundSchema)
