@@ -1,10 +1,9 @@
 const Campground = require("../models/campground");
 const wrapAsync = require("../utils/catchAsync");
-
+const { cloudinary } = require("../cloudinary");
 // Show all campgrounds
 module.exports.index = wrapAsync(async (req, res) => {
   const campgrounds = await Campground.find({})
-  console.log(campgrounds[0].images[0])
   res.render('campgrounds/index', { campgrounds: campgrounds })
 })
 
@@ -55,11 +54,23 @@ module.exports.show = wrapAsync(async (req, res) => {
 //Edit Campground
 module.exports.edit = wrapAsync(async (req, res) => {
   const { id } = req.params;
+  const { campground: camp } = req.body;
 
-    const response = await Campground.findByIdAndUpdate(id, {...req.body.campground}, {new: true})
-    req.flash("success", "Campground edited successfully!")
+  const campground = await Campground.findByIdAndUpdate(id, {...camp}, {new: true})
+  const images = req.files.map(f => ({ url: f.path, filename: f.filename }))
+  campground.images.push(...images)
+  await  campground.save();
 
-    res.redirect(`/campgrounds/${id}`)
+  if(req.body.deleteImages){
+    for(let image of req.body.deleteImages) {
+      await cloudinary.uploader.destroy(image)
+    }
+    await campground.updateOne({ $pull: { images: { filename: {  $in: req.body.deleteImages } }}})
+  }
+
+  req.flash("success", "Campground edited successfully!")
+
+  res.redirect(`/campgrounds/${id}`)
 
 })
 

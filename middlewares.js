@@ -15,6 +15,7 @@ module.exports.ensureLoggedIn = function(req, res, next){
 
 module.exports.isAuthor = async function(req, res, next) {
   const camp = await Campground.findById(req.params.id);
+  
   if(!camp.author.equals(req.user._id)){
     req.flash("error", "You do not have permission to do that!")
     return res.redirect(`/campgrounds/${req.params.id}`)
