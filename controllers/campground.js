@@ -24,7 +24,7 @@ module.exports.createNew = wrapAsync(async (req, res) => {
   newCamp.images = images;
   newCamp.author = req.user._id;
   await newCamp.save()
-  
+
   req.flash("success", "Successfully created a new campground!")
   res.redirect('/campgrounds')
 })
@@ -56,6 +56,7 @@ module.exports.show = wrapAsync(async (req, res) => {
     req.flash('error', "Campground not found!");
     return res.redirect('/campgrounds')
   }
+  
   res.render('campgrounds/show', { campground: campground })
 })
 
