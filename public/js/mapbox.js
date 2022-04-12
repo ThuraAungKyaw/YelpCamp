@@ -1,5 +1,5 @@
 mapboxgl.accessToken = mapToken;
-console.log(campground)
+
 const cg = JSON.parse(campground);
 const map = new mapboxgl.Map({
 container: 'map',
@@ -7,6 +7,8 @@ style: 'mapbox://styles/mapbox/streets-v11',
 center: cg.geometry.coordinates,
 zoom: 9
 });
+
+map.addControl(new mapboxgl.NavigationControl())
 
 new mapboxgl.Marker()
 .setLngLat(cg.geometry.coordinates)
